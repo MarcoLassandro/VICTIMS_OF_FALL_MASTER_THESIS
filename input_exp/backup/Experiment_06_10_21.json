@@ -1,0 +1,17 @@
+{
+	"dataset_variants": ["complete"], 
+	"only_BMI": "True", 
+	"use_special_mask": "False", 
+	"reduce_dim":"[MaskedPCA(mask=mask, n_components = 3), MaskedSVD(mask=mask)]", 
+	"regressor" : "[KerasRegressor(build_fn=baseline_model, epochs=20, verbose=0)]", 
+	"floor_labels" : "True",
+	"params" : [
+                {
+                    "reduce_dim": "[MaskedPCA(mask=mask), MaskedSVD(mask=mask)]",
+                    "reduce_dim__n_components":  "[1,2,3]",
+					"regressor__batch_size" : "[5, 50]"
+                }
+            ],
+	"metrics" : "['neg_root_mean_squared_error']",
+	"n_split_outer_kcv" : 10
+}

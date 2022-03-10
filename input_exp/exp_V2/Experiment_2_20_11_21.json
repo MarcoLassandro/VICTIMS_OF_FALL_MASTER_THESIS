@@ -1,0 +1,26 @@
+{
+	"dataset_settings": {
+							"dataset_variants": ["complete", "only_totals", "only_binary"], 
+							"type_of_labels": "floors",
+							"only_BMI": 1
+						},
+	"task": "Regression",
+	"pipe" :{
+				"feature_extraction":"GroupedPCA(mask=mask)", 
+				"scaler" : "RobustScaler()",
+				"estimator" : "Ridge(tol = 0.01, solver = 'sag')"
+			},
+	"hp_optimizer" :{
+		"type" : "RandomizeSearchCV",
+		"n_iter" : 500,
+		"params" : [
+					{
+						"feature_extraction__n_components":  "np.arange(1, X[:, mask].shape[1])",
+						"estimator__alpha" : "2.0**np.arange(-6, +6)"
+					}
+				],
+		"metrics" : ["neg_root_mean_squared_error", "r2", "neg_mean_absolute_error"],
+		"n_split_outer_cv" : 10,
+		"n_split_inner_cv" : 10
+	}
+}

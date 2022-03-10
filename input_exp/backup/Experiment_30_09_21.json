@@ -1,0 +1,25 @@
+{
+	"dataset_variants": ["complete"], 
+	"only_BMI": "False", 
+	"use_special_mask": "True", 
+	"reduce_dim":"[GroupedPCA(mask=mask), GroupedSVD(mask=mask)]", 
+	"regressor" : "[DecisionTreeRegressor(), Ridge()]", 
+	"floor_labels" : "False",
+	"params" : [
+                {
+					"reduce_dim" : "[GroupedPCA(mask=mask), GroupedSVD(mask=mask)]",
+                    "reduce_dim__n_components":  "[1,2,3,4,5]",
+                    "regressor__max_depth": "[5, 10, 30]",
+                    "regressor": "[DecisionTreeRegressor()]"
+                },
+               {
+					"reduce_dim" : "[GroupedPCA(mask=mask), GroupedSVD(mask=mask)]",
+                    "reduce_dim__n_components": "[1,2,3,4,5]",
+                    "regressor__alpha": "2.0**np.arange(-6, +6)",
+                    "regressor": "[Ridge()]"
+                }
+            ],
+	"metrics" : "['neg_root_mean_squared_error']",
+	"n_split_outer_kcv" : 10,
+	"n_split_inner_kcv" : 10
+}

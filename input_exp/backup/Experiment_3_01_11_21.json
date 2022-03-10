@@ -1,0 +1,31 @@
+{
+	"dataset_variants": ["only_totals", "complete"], 
+	"only_BMI": "True", 
+	"use_special_mask": "False", 
+	"reduce_dim":"[MaskedPCA(mask=mask), MaskedSVD(mask=mask)]", 
+	"scaler": "[MinMaxScaler(), StandardScaler(), RobustScaler()]",
+	"clf" : "[XGBClassifier(), GradientBoostingClassifier(), RandomForestClassifier(criterion = 'entropy')]", 
+	"floor_labels" : "True",
+	"params" : [
+                {
+					"clf" : "[XGBClassifier(verbose = 0)]",
+                    "reduce_dim": "[MaskedPCA(mask=mask), MaskedSVD(mask=mask)]",
+                    "reduce_dim__n_components":  "[2,3,4]",
+					"scaler" : "[MinMaxScaler()]",
+					"clf__eta" : "[0.3, 1e-3]",
+					"clf__max_depth" : "[5, 10, 15]"
+                },
+				{
+					"clf" : "[RandomForestClassifier(criterion = 'entropy')]",
+                    "reduce_dim": "[MaskedPCA(mask=mask), MaskedSVD(mask=mask)]",
+					"reduce_dim__n_components":  "[1]",
+					"scaler" : "[MinMaxScaler()]",
+					"clf__n_estimators": "[150]",
+					"clf__max_depth" : "[5, 10, 15]"
+                }	
+            ],
+	"metrics" : "['accuracy']",
+	"binarize" : "4",
+	"n_split_outer_kcv" : 10
+}
+

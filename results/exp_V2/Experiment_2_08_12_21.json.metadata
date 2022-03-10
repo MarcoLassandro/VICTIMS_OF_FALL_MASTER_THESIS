@@ -1,0 +1,64 @@
+{
+    "creation_time": 1646876738.1387107,
+    "creation_time_human": "2022-03-10 02:45:38",
+    "time_delta": 1192.16300034523,
+    "time_delta_human": "19 minutes and 52 seconds",
+    "file_dump_time": 0.002992391586303711,
+    "file_dump_time_human": "0 seconds",
+    "file_dump_size": 59952,
+    "file_dump_size_human": "60.0 kB",
+    "load_kwargs": {},
+    "dump_kwargs": {},
+    "function_name": "experiment",
+    "function_file": "C:\\Users\\NileNile\\Desktop\\REPOSITORY\\VICTIMS_OF_FALL_MASTER_THESIS\\framework\\src\\experiment_tools\\Experiment.py:130",
+    "args_to_ignore": [],
+    "source": "    @Cache(\n        cache_path=\"{working_path}\\\\{result_path}\\\\{experiment_name}.json\"\n    )\n    def experiment(self, working_path, result_path, experiment_name, experiment_setup, dataset_name = \"victims_of_fall_V1\"):\n        path_str = f\"{working_path}\\\\data\\\\{dataset_name}.csv\"\n        df = pd.read_csv(path_str)\n        binarize = None if \"binarize\" not in experiment_setup.keys() else eval(experiment_setup[\"binarize\"])\n\n        dataset_list = self.get_dataset(df, experiment_setup[\"dataset_settings\"])\n\n        all_performance = []\n        for dataset in dataset_list:\n            dataset_variant = dataset[\"dataset_variant\"]\n            print(dataset_variant)\n\n            X = dataset[\"X\"].to_numpy()\n            y = dataset[\"y\"].to_numpy(dtype='int32').ravel()\n\n            # TYPE OF TASK\n            task = experiment_setup['task']\n\n            # THE MASK IS REQUIRED WHEN MASKEDPCA OR MASKEDSVD IS USED\n            if experiment_setup[\"dataset_settings\"][\"only_BMI\"] == 1:\n                mask = np.arange(X.shape[1]) > 2\n            else:\n                mask = np.arange(X.shape[1]) > 4\n\n            # BUILDING THE PIPELINE\n            pipe_steps = []\n            for key, value in experiment_setup[\"pipe\"].items():\n                pipe_steps.append((key, eval(value)))\n            pipe = Pipeline(pipe_steps)\n\n            hp_optimizer = experiment_setup[\"hp_optimizer\"]\n            metrics = hp_optimizer.get(\"metrics\")\n\n            params_list = []\n            parsed_params = {}\n            for parameter, values in hp_optimizer.get(\"params\")[0].items():\n                parsed_params[parameter] = eval(values)\n            params_list.append(parsed_params)\n\n            list_skf = []\n\n            if \"n_split_outer_cv\" in hp_optimizer.keys():\n                cv_type = \"n_split_outer_cv\"\n                list_skf.append(StratifiedKFold(n_splits=hp_optimizer[cv_type], shuffle=True, random_state=42))\n\n            if \"n_split_inner_cv\" in hp_optimizer.keys():\n                cv_type = \"n_split_inner_cv\"\n                list_skf.append(StratifiedKFold(n_splits=hp_optimizer[cv_type], shuffle=True, random_state=42))\n\n            if hp_optimizer[\"type\"] == 'GridSearchCV':\n                optimizer = GridSearchCV(pipe, parsed_params, n_jobs=self.cpu_1, cv=list_skf[-1], verbose=1, scoring=metrics,\n                                         refit=metrics[0], return_train_score=True).fit(X, y)\n            elif hp_optimizer[\"type\"] == 'RandomizeSearchCV':\n                n_iter = hp_optimizer[\"n_iter\"] if \"n_iter\" in hp_optimizer.keys() else 100\n                print(f\"n_iter:{n_iter}\")\n                optimizer = RandomizedSearchCV(pipe, parsed_params, n_iter=n_iter, cv=list_skf[-1], verbose=1,\n                                               scoring=metrics, refit=metrics[0], return_train_score=True).fit(X, y)\n            elif hp_optimizer[\"type\"] == 'BayesSearchCV':\n                n_iter = hp_optimizer[\"n_iter\"] if \"n_iter\" in hp_optimizer.keys() else 100\n                print(f\"n_iter:{n_iter}\")\n                optimizer = BayesSearchCV(pipe, parsed_params, n_jobs=self.cpu_1, n_iter=n_iter, cv=list_skf[-1], verbose=1,\n                                          scoring=metrics, refit=metrics[0], return_train_score=True).fit(X, y)\n\n            if \"n_split_inner_cv\" in hp_optimizer.keys():\n                cv_dic = cross_validate(optimizer, X, y, cv=list_skf[0], n_jobs=self.cpu_2, scoring=metrics,\n                                        return_estimator=True, verbose=2, return_train_score=True)\n                best_params_cv = [estimator.best_params_ for estimator in cv_dic[\"estimator\"]]\n\n                scores_test_dict = {}\n                scores_train_dict = {}\n                for metric in metrics:\n                    scores_test_dict[metric] = np.mean(cv_dic[f\"test_{metric}\"])\n                    scores_train_dict[metric] = np.mean(cv_dic[f\"train_{metric}\"])\n\n                cv_results = str(cv_dic)\n            else:\n                best_params_cv = [optimizer.best_params_]\n                best_model = pd.DataFrame(optimizer.cv_results_).iloc[optimizer.best_index_]\n\n                scores_test_dict = {}\n                scores_train_dict = {}\n                for metric in metrics:\n                    scores_test_dict[metric] = best_model[f\"mean_test_{metric}\"]\n                    scores_train_dict[metric] = best_model[f\"mean_train_{metric}\"]\n\n                cv_results = str(optimizer.cv_results_)\n\n            score = {\n                \"experiment_name\": experiment_name,\n                \"dataset_variant\": dataset_variant,\n                \"estimator\": experiment_setup['pipe']['estimator'],\n                \"task\": task,\n                \"hp_optimizer\": hp_optimizer['type'],\n                \"cv_type\": cv_type,\n                \"mean_test_score\": scores_test_dict,\n                \"mean_train_score\": scores_train_dict,\n                \"best_params\": str(best_params_cv),\n                \"cv_results\": cv_results,\n                \"experiment_setup\": experiment_setup\n            }\n\n            all_performance.append(score)\n\n        return all_performance\n",
+    "backend_metadata": {},
+    "parameters": {
+        "dataset_name": "victims_of_fall_V2",
+        "working_path": "C:\\Users\\NileNile\\Desktop\\REPOSITORY\\VICTIMS_OF_FALL_MASTER_THESIS",
+        "result_path": "results\\exp_V2",
+        "experiment_name": "Experiment_2_08_12_21",
+        "experiment_setup": {
+            "dataset_settings": {
+                "dataset_variants": [
+                    "complete",
+                    "only_totals",
+                    "only_binary"
+                ],
+                "type_of_labels": "floors",
+                "only_BMI": 1,
+                "binarize": 2,
+                "percentage": 1,
+                "total_dmg": 1
+            },
+            "task": "Classification",
+            "pipe": {
+                "feature_extraction": "MaskedSVD(mask=mask)",
+                "scaler": "MinMaxScaler()",
+                "estimator": "RandomForestClassifier(criterion = 'entropy')"
+            },
+            "hp_optimizer": {
+                "type": "RandomizeSearchCV",
+                "n_iter": 20,
+                "params": [
+                    {
+                        "feature_extraction": "[MaskedSVD(mask=mask), MaskedPCA(mask=mask)]",
+                        "feature_extraction__n_components": "np.arange(1, X[:, mask].shape[1])",
+                        "estimator__n_estimators": "[150, 200, 250]",
+                        "estimator__max_depth": "[5, 10, 15, 20]"
+                    }
+                ],
+                "metrics": [
+                    "accuracy",
+                    "f1_micro",
+                    "f1_macro",
+                    "neg_root_mean_squared_error",
+                    "neg_mean_absolute_error"
+                ],
+                "n_split_outer_cv": 10,
+                "n_split_inner_cv": 10
+            }
+        }
+    }
+}

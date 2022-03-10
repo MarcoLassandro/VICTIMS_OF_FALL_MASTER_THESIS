@@ -1,0 +1,21 @@
+{
+	"dataset_variants": ["complete", "only_binary", "only_totals"], 
+	"only_BMI": "True", 
+	"use_special_mask": "False", 
+	"reduce_dim":"[MaskedPCA(mask=mask), MaskedSVD(mask=mask)]",
+	"scaler": "[MinMaxScaler(), StandardScaler(), RobustScaler(), Normalizer()]",
+	"regressor" : "[SVR(kernel='linear')]", 
+	"floor_labels" : "True",
+	"params" : [
+                {
+                    "reduce_dim": "[MaskedPCA(mask=mask), MaskedSVD(mask=mask)]",
+                    "reduce_dim__n_components":  "[3,4,5]",
+					"scaler": "[MinMaxScaler(), StandardScaler(), RobustScaler(), Normalizer()]",
+					"regressor__tol" : "[1e-3, 1e-2, 0.1]",
+					"regressor__epsilon": "[1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1]"
+                }
+            ],
+	"metrics" : "['neg_root_mean_squared_error']",
+	"n_split_outer_kcv" : 10,
+	"n_split_inner_kcv" : 10
+}

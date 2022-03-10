@@ -1,0 +1,18 @@
+{
+	"dataset_variants": ["complete"], 
+	"only_BMI": "True", 
+	"use_special_mask": "False", 
+	"reduce_dim":"[MaskedPCA(n_components = 3, mask=mask), MaskedSVD(n_components = 3, mask=mask)]", 
+	"regressor" : "[RandomForestRegressor(max_depth = 5, criterion = 'mse')]", 
+	"floor_labels" : "True",
+	"params" : [
+                {
+                    "reduce_dim": "[MaskedPCA(mask=mask), MaskedSVD(mask=mask)]",
+					"regressor__n_estimators": "[5, 10, 100]",
+					"regressor__max_depth" : "[5, 10]"
+                }
+            ],
+	"metrics" : "['neg_root_mean_squared_error']",
+	"n_split_outer_kcv" : 10,
+	"n_split_inner_kcv" : 10
+}

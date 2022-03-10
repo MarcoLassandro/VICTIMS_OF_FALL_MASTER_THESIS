@@ -1,0 +1,46 @@
+{
+    "creation_time": 1634492396.4676514,
+    "creation_time_human": "2021-10-17 19:39:56",
+    "time_delta": 98.91568756103516,
+    "time_delta_human": "1 minute and 38 seconds",
+    "file_dump_time": 0.0029990673065185547,
+    "file_dump_time_human": "0 seconds",
+    "file_dump_size": 76813,
+    "file_dump_size_human": "76.8 kB",
+    "load_kwargs": {},
+    "dump_kwargs": {},
+    "function_name": "experiment",
+    "function_file": "<ipython-input-9-6347216457e9>:62",
+    "args_to_ignore": [],
+    "source": "@Cache(\n    cache_path=\"results/{experiment_name}.json\"\n)\ndef experiment(path, experiment_name, experiment_setup):\n    path_str = \"data/victims_of_fall_V1.csv\"\n    df = pd.read_csv(path_str)\n\n    dataset_list = get_dataset(df, experiment_setup[\"dataset_variants\"], eval(experiment_setup[\"only_BMI\"]), eval(experiment_setup[\"floor_labels\"]), eval(experiment_setup[\"binarize\"]))\n\n    all_performance = []\n    for dataset in dataset_list:\n        dataset_variant = dataset[\"dataset_variant\"]\n        print(dataset_variant)\n\n        X = dataset[\"X\"].to_numpy()\n        y = dataset[\"y\"].to_numpy().ravel()\n\n        if eval(experiment_setup[\"use_special_mask\"]) == True and dataset_variant == \"complete\":\n            mask = [0,0,0,0,0,0,1,1,1,1,1,0,2,2,2,2,2,0,3,3,3,3,3,0,4,4,4,4,4]\n        else:\n            if eval(experiment_setup[\"only_BMI\"]) == True:\n                mask = np.arange(X.shape[1]) > 2\n            else:\n                mask = np.arange(X.shape[1]) > 4\n\n        pipe_steps = []\n        if \"reduce_dim\" in experiment_setup.keys():\n            reduce_dim = eval(experiment_setup[\"reduce_dim\"])\n            pipe_steps.append((\"reduce_dim\", reduce_dim[0]))\n\n        if \"scaler\" in experiment_setup.keys():\n            scaler = eval(experiment_setup[\"scaler\"])\n            pipe_steps.append((\"scaler\", scaler[0]))\n\n        if \"regressor\" in experiment_setup.keys():\n            estimator = eval(experiment_setup[\"regressor\"])\n            pipe_steps.append((\"regressor\", estimator[0]))\n        elif \"clf\" in experiment_setup.keys():\n            estimator = eval(experiment_setup[\"clf\"])\n            pipe_steps.append((\"clf\", estimator[0]))\n\n        if  \"params\" in experiment_setup.keys():\n            params = experiment_setup[\"params\"]\n\n        if \"n_split_inner_kcv\" in experiment_setup.keys():\n            inner_skf = StratifiedKFold(n_splits=experiment_setup[\"n_split_inner_kcv\"], shuffle = True, random_state=42)\n\n        if \"n_split_outer_kcv\" in experiment_setup.keys():\n            outer_skf = StratifiedKFold(n_splits=experiment_setup[\"n_split_outer_kcv\"], shuffle = True, random_state=42)\n\n        parsed_params = eval_params(params, X, mask)\n        metrics = eval(experiment_setup[\"metrics\"])\n\n        pipe = Pipeline(pipe_steps)\n\n        if \"n_split_inner_kcv\" in experiment_setup.keys():\n            gridsearch = GridSearchCV(pipe, parsed_params, cv=inner_skf, verbose=1, scoring = metrics[0], return_train_score=True).fit(X,y)\n           \n            cv_dic = cross_validate(gridsearch, X, y, cv=outer_skf, scoring=metrics[0], return_estimator=True, return_train_score=True)\n            best_params_cv = [estimator.best_params_ for estimator in cv_dic[\"estimator\"]]\n\n            score = {\n                \"dataset_variant\": dataset_variant,\n                \"experiment_setup\": experiment_setup,\n                \"best_params\": str(best_params_cv),\n                \"mean_test_score\": [np.mean(cv_dic[f\"test_{metric}\"]) for metric in metrics],\n                \"mean_train_score\": [np.mean(cv_dic[f\"train_{metric}\"]) for metric in metrics],\n                \"cv_results\" : str(cv_dic)\n            }\n            \n        else:\n            gridsearch = GridSearchCV(pipe, parsed_params, cv=outer_skf, verbose=1, n_jobs = cpu_count(), scoring = metrics[0], return_train_score=True).fit(X,y)\n            best_params_cv = gridsearch.best_params_\n\n            score = {\n                \"dataset_variant\": dataset_variant,\n                \"experiment_setup\": experiment_setup,\n                \"best_params\": str(best_params_cv),\n                \"mean_test_score\": gridsearch.best_score_,\n                \"cv_results\" : str(gridsearch.cv_results_)\n            }\n\n        all_performance.append(score)\n                \n    return all_performance\n",
+    "backend_metadata": {},
+    "parameters": {
+        "path": "./results/",
+        "experiment_name": "Experiment_2_17_10_21",
+        "experiment_setup": {
+            "dataset_variants": [
+                "complete",
+                "only_binary",
+                "only_totals"
+            ],
+            "only_BMI": "True",
+            "use_special_mask": "False",
+            "reduce_dim": "[MaskedPCA(mask=mask), MaskedSVD(mask=mask)]",
+            "scaler": "[MinMaxScaler(), StandardScaler(), RobustScaler()]",
+            "clf": "[RandomForestClassifier(criterion = 'entropy')]",
+            "floor_labels": "True",
+            "params": [
+                {
+                    "reduce_dim": "[MaskedPCA(mask=mask), MaskedSVD(mask=mask)]",
+                    "reduce_dim__n_components": "[1]",
+                    "scaler": "[MinMaxScaler()]",
+                    "clf__n_estimators": "[150, 200, 250]",
+                    "clf__max_depth": "[5, 10, 15, 20]"
+                }
+            ],
+            "metrics": "['accuracy']",
+            "binarize": "True",
+            "n_split_outer_kcv": 10
+        }
+    }
+}

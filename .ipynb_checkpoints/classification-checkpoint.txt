@@ -1,0 +1,16 @@
+\begin{tabular}{llll}
+\toprule
+{} & Dataset variant &                       Model &          Accuracy \\
+\midrule
+19 &     only\_totals &             RidgeClassifier &  0.82 (std. 0.06) \\
+16 &     only\_totals &                         SVC &  0.82 (std. 0.06) \\
+26 &     only\_binary &               XGBClassifier &  0.81 (std. 0.06) \\
+14 &     only\_binary &      RandomForestClassifier &  0.81 (std. 0.08) \\
+1  &     only\_totals &  GradientBoostingClassifier &   0.8 (std. 0.06) \\
+31 &     only\_totals &      DecisionTreeClassifier &  0.78 (std. 0.06) \\
+35 &     only\_binary &          LogisticRegression &  0.32 (std. 0.07) \\
+10 &     only\_totals &                  LogisticIT &  0.31 (std. 0.07) \\
+8  &     only\_binary &                  LogisticAT &   0.3 (std. 0.09) \\
+4  &     only\_totals &     OrdinalBinaryClassifier &  0.19 (std. 0.05) \\
+\bottomrule
+\end{tabular}
