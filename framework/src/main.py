@@ -2,7 +2,7 @@ import pandas as pd
 from experiment_tools import *
 import json
 
-working_path = "C:\\Users\\NileNile\\Desktop\\REPOSITORY\\VICTIMS_OF_FALL_MASTER_THESIS"
+working_path = "C:\\Users\\lassa\\OneDrive\\Desktop\\workspace\\VICTIMS_OF_FALL_MASTER_THESIS"
 
 
 experiment_name = "Experiment_10_08_12_21"

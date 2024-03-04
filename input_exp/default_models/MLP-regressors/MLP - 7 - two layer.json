@@ -1,0 +1,32 @@
+{
+	"dataset_settings": {
+							"dataset_variants": ["complete", "only_totals", "only_binary"], 
+							"type_of_labels": "floors",
+							"only_BMI": 1,
+							"total_dmg" : 1
+						},
+						
+	"task": "Regression",
+	"pipe" :{
+				"feature_extraction":"MaskedSVD(mask=mask, n_components = 5)", 
+				"scaler" : "MinMaxScaler()",
+				"estimator" : "KerasRegressor(model=create_regression_model, epochs=150, batch_size=10, verbose=0)"
+			},
+	"hp_optimizer" :{
+		"type" : "RandomizeSearchCV",
+		"params" : [
+					{
+						"scaler" : "[StandardScaler(), MinMaxScaler(), RobustScaler()]",
+						"feature_extraction__n_components":  "[4]",
+						"feature_extraction": "[MaskedSVD(mask=mask), MaskedPCA(mask=mask)]",
+						"estimator__model__dim": "[7]",
+						"estimator__model__optimizer": "[\"adam\", \"sgd\"]",
+						"estimator__model__hidden_layer_sizes": "[(8,4), (16,8), (32,16), (64,32), (128,64)]",
+						"estimator__model__num_layers": "[2]"
+					}
+				],
+		"metrics" : ["neg_root_mean_squared_error", "r2", "neg_mean_absolute_error"],
+		"n_split_outer_cv" : 10,
+		"n_split_inner_cv" : 10
+	}
+}

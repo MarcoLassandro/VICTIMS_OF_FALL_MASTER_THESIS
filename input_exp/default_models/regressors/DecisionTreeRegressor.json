@@ -1,0 +1,26 @@
+{
+	"dataset_settings": {
+							"dataset_variants": ["complete", "only_totals", "only_binary"], 
+							"type_of_labels": "floors",
+							"only_BMI": 1,
+							"total_dmg": 1
+						},
+	"task": "Regression",
+	"pipe" :{
+				"feature_extraction":"MaskedSVD(mask=mask)", 
+				"scaler" : "MinMaxScaler()",
+				"estimator" : "DecisionTreeRegressor()"
+			},
+	"hp_optimizer" :{
+		"type" : "RandomizeSearchCV",
+		"params" : [
+					{
+						"feature_extraction": "[MaskedSVD(mask=mask), MaskedPCA(mask=mask)]",
+						"feature_extraction__n_components":  "np.arange(1, X[:, mask].shape[1])"
+					}
+				],
+		"metrics" : ["neg_root_mean_squared_error", "r2", "neg_mean_absolute_error"],
+		"n_split_outer_cv" : 10,
+		"n_split_inner_cv" : 10
+	}
+}

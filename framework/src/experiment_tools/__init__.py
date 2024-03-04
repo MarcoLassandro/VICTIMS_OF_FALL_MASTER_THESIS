@@ -1,4 +1,5 @@
-from .Experiment import Experiment
+from .Experiment import *
+from .ResultsService import *
 from .ChainedEstimator import ChainedEstimator
 #from .FuzzyCMeans import FuzzyCMeans
 from .GranularBinaryClassifier import GranularBinaryClassifier

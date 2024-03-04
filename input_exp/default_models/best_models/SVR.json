@@ -1,0 +1,14 @@
+{
+	"dataset_settings": {
+							"dataset_variants": ["only_totals"], 
+							"type_of_labels": "floors",
+							"only_BMI": 1,
+							"total_dmg": 1
+						},
+	"task": "Regression",
+	"pipe" :{
+				"feature_extraction":"MaskedPCA(mask=mask,n_components=4)", 
+				"scaler" : "MinMaxScaler()",
+				"estimator" : "SVR()"
+			}
+}

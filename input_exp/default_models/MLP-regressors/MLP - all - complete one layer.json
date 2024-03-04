@@ -1,0 +1,28 @@
+{
+	"dataset_settings": {
+							"dataset_variants": ["complete"], 
+							"type_of_labels": "floors",
+							"only_BMI": 1,
+							"total_dmg" : 1
+						},
+						
+	"task": "Regression",
+	"pipe" :{
+				"scaler" : "MinMaxScaler()",
+				"estimator" : "KerasRegressor(model=create_regression_model, epochs=150, batch_size=10, verbose=0)"
+			},
+	"hp_optimizer" :{
+		"type" : "RandomizeSearchCV",
+		"params" : [
+					{
+						"estimator__model__dim": "[28]",
+						"estimator__model__optimizer": "[\"adam\", \"sgd\"]",
+						"estimator__model__hidden_layer_sizes": "[(8,4,2), (16,8,4), (32,16,8), (64,32,16), (128,64,32)]",
+						"estimator__model__num_layers": "[1]"
+					}
+				],
+		"metrics" : ["neg_root_mean_squared_error", "r2", "neg_mean_absolute_error"],
+		"n_split_outer_cv" : 10,
+		"n_split_inner_cv" : 10
+	}
+}
