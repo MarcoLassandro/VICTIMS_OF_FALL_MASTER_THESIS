@@ -8,16 +8,16 @@
 						
 	"task": "Classification",
 	"pipe" :{
-				"feature_extraction":"MaskedSVD(mask=mask, n_components = 5)", 
 				"scaler" : "MinMaxScaler()",
-				"estimator" : "KerasClassifier(model=create_model, epochs=150, batch_size=10, verbose=0)"
+				"estimator" : "KerasClassifier(model=create_classifier_model, epochs=150, batch_size=10, verbose=0)"
 			},
 	"hp_optimizer" :{
 		"type" : "RandomizeSearchCV",
 		"params" : [
 					{
-						"estimator__model__X_shape":"[5]",
-						"feature_extraction": "[MaskedSVD(mask=mask), MaskedPCA(mask=mask)]"
+						"estimator__model__dim": "[8]",
+						"estimator__model__optimizer": "[\"adam\", \"sgd\"]",
+						"estimator__model__hidden_layer_sizes": "[(8,4,2), (16,8,4), (32,16,8), (64,32,16), (128,64,32)]"
 					}
 				],
 		"metrics" : ["balanced_accuracy", "f1_micro", "f1_macro", "neg_root_mean_squared_error", "neg_mean_absolute_error"],	

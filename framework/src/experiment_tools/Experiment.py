@@ -45,6 +45,18 @@ from tensorflow.keras import regularizers
 cpu_1 = 14
 cpu_2 = 14
 
+def create_classifier_model(optimizer='adam', dim=1, hidden_layer_sizes=(64,), num_layers=1):
+    model = Sequential()
+    for i in range(num_layers):
+        if i == 0:
+            model.add(Dense(hidden_layer_sizes[i], input_dim=dim, activation='relu'))
+        else:
+            model.add(Dense(hidden_layer_sizes[i], activation='relu'))
+    model.add(Dense(7, activation='softmax'))  # Use 'linear' activation for regression
+    model.compile(loss='sparse_categorical_crossentropy', optimizer=optimizer)
+    return model
+
+
 def create_regression_model(optimizer='adam', dim=1, hidden_layer_sizes=(64,), num_layers=1):
     model = Sequential()
     for i in range(num_layers):

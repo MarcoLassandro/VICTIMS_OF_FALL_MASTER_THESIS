@@ -21,7 +21,7 @@
 						"feature_extraction__n_components":  "np.arange(1, X[:, mask].shape[1])"
 					}
 				],
-		"metrics" : ["accuracy", "f1_micro", "f1_macro", "neg_root_mean_squared_error", "neg_mean_absolute_error"],	
+		"metrics" : ["balanced_accuracy", "f1_micro", "f1_macro", "neg_root_mean_squared_error", "neg_mean_absolute_error"],	
 		"n_split_outer_cv" : 10,
 		"n_split_inner_cv" : 10
 	}

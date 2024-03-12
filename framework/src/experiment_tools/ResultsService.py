@@ -1,6 +1,8 @@
 import json
 import pandas as pd
 import numpy as np
+from json import JSONDecodeError
+
 from numpy import array
 
 def charge_results(files):
@@ -19,8 +21,8 @@ def charge_results(files):
 def filter_and_sort_results(results, fields_value, target_metric):
     for k, v in results.items():
         results = results.loc[results[k] == v]
-
     results = results.reset_index().drop('index', axis=1)
+
     results = results.sort_values(by='mean_test_score', axis=0, ascending=False,
                                   key=lambda x: x.apply(lambda y: y[target_metric]))
     return results
@@ -67,7 +69,10 @@ def add_floor_field(results):
     for i, v in results.iterrows():
         v = v['experiment_setup']
         v = str(v).replace("'", "\"")
-        experiment_setup = json.loads(v)
+        try:
+            experiment_setup = json.loads(v)
+        except JSONDecodeError:
+            print(v)
         b = experiment_setup["dataset_settings"]['binarize']
         results.at[i, 'Floor Threshold'] = str(b[0])
     return results
